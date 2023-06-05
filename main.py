@@ -4,6 +4,10 @@ from config import settings
 import PyPDF2
 import openai
 import json
+import Database.model as model
+from Database.session import engine
+
+model.Base.metadata.create_all(bind=engine)
 
 app = FastAPI()
 
