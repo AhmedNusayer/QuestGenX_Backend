@@ -5,13 +5,14 @@ from pydantic.types import conint
 
 T = TypeVar('T')
 
-class QASchema(BaseModel):
+class UserSchema(BaseModel):
     id: int
-    userId: str
-    examId: int
-    question: str
-    options: List[str]
+    email: str
 
     class Config:
         orm_mode = True
+
+
+class RequestUser(BaseModel):
+    parameter: UserSchema = Field(...)
 

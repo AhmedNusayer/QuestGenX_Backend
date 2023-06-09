@@ -4,8 +4,9 @@ from config import settings
 import PyPDF2
 import openai
 import json
-import Database.model as model
-from Database.session import engine
+import Repository.model as model
+from Repository.session import engine
+import router
 
 model.Base.metadata.create_all(bind=engine)
 
@@ -22,6 +23,9 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"]
 )
+
+
+app.include_router(router.router, prefix="/api/user", tags=["user"])
 
 
 @app.get("/")
