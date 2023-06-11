@@ -3,3 +3,6 @@ openai
 pydantic
 PyPDF2
 SQLAlchemy
+
+pytesseract
+pdf2image

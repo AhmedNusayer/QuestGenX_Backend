@@ -1,7 +1,6 @@
-from typing import List, Optional, Generic, TypeVar
+from typing import TypeVar
 from pydantic import BaseModel, Field
-from pydantic.generics import GenericModel
-from pydantic.types import conint
+
 
 T = TypeVar('T')
 

@@ -1,7 +1,7 @@
-from fastapi import APIRouter, HTTPException, Path, Depends
+from fastapi import APIRouter, Depends
 from Repository.session import SessionLocal
 from sqlalchemy.orm import Session
-from Repository.schemas import UserSchema, RequestUser
+from Repository.schemas import RequestUser
 import Repository.user_repo as user_repo
 
 
