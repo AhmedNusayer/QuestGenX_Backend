@@ -3,6 +3,9 @@ openai
 pydantic
 PyPDF2
 SQLAlchemy
-
+python-dotenv
 pytesseract
 pdf2image
+uvicorn[standard]
+psycopg2
+python-multipart
