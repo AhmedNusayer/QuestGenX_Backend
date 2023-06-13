@@ -9,6 +9,8 @@ import pytesseract
 import openai
 import json
 
+from Services import audio_service
+
 
 router = APIRouter()
 
@@ -72,3 +74,35 @@ async def generate_question(no_of_quest: int, file: UploadFile):
 
     # return response
     return json.loads(response.choices[0].message["content"])
+
+
+@router.post('/evaluateSpeech')
+async def evaluate_speech(file: UploadFile):
+    file_path = file.filename
+
+    with open(file_path, "wb") as f:
+        f.write(file.file.read())
+
+    audio_data = audio_service.get_large_audio_transcription_on_silence(file_path)
+
+    openai.api_key = settings.openai_api_key
+    model = "gpt-3.5-turbo"
+
+    prompt = f"""
+           You are an English language learning assistant. The student has given you the text {audio_data}.
+           Give a review of this text. Mention if there is any grammatical error or not. 
+           Give your review in points and in a friendly tone. If there is any room for improvement
+           then suggest it too.
+           """
+
+    messages = [{"role": "user", "content": prompt}]
+    response = openai.ChatCompletion.create(
+        model=model,
+        messages=messages,
+        temperature=0,  # this is the degree of randomness of the model's output
+    )
+
+    os.remove(file_path)
+
+    return response.choices[0].message["content"]
+

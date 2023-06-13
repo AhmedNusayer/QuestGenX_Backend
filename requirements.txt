@@ -9,3 +9,5 @@ pdf2image
 uvicorn[standard]
 psycopg2
 python-multipart
+SpeechRecognition
+pydub
