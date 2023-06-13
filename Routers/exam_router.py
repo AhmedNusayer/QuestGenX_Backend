@@ -1,7 +1,8 @@
-from fastapi import APIRouter
+from fastapi import APIRouter, Depends
 from config import settings
 from fastapi import UploadFile
 from pdf2image import convert_from_path
+from sqlalchemy.orm import Session
 
 import PyPDF2
 import os
@@ -10,6 +11,8 @@ import openai
 import json
 
 from Services import audio_service
+from Repository.session import SessionLocal
+from Repository import exam_repo
 
 
 router = APIRouter()
@@ -17,8 +20,22 @@ router = APIRouter()
 pytesseract.pytesseract.tesseract_cmd = r'C:\Program Files\Tesseract-OCR\tesseract.exe'
 
 
+def get_db():
+    db = SessionLocal()
+    try:
+        yield db
+    finally:
+        db.close()
+
+
+@router.post('/getExam')
+async def get_exam_by_exam_id(examId: int, db: Session=Depends(get_db)):
+    exam = exam_repo.get_exam(db, examId)
+    return json.loads(exam.script)
+
+
 @router.post('/generateQuestion')
-async def generate_question(no_of_quest: int, file: UploadFile):
+async def generate_question(no_of_quest: int, file: UploadFile, db: Session=Depends(get_db)):
     try:
         # Save the uploaded file to disk
         file_path = f"temp/{file.filename}"
@@ -71,6 +88,8 @@ async def generate_question(no_of_quest: int, file: UploadFile):
         messages=messages,
         temperature=0,  # this is the degree of randomness of the model's output
     )
+
+    exam_repo.save_exam(db, userId=1, script=response.choices[0].message["content"])
 
     # return response
     return json.loads(response.choices[0].message["content"])
