@@ -34,8 +34,41 @@ async def get_exam_by_exam_id(examId: int, db: Session=Depends(get_db)):
     return json.loads(exam.script)
 
 
-@router.post('/generateQuestion')
-async def generate_question(no_of_quest: int, file: UploadFile, db: Session=Depends(get_db)):
+@router.post('/generateQuestionFromText')
+async def generate_question_from_text(no_of_quest: int, text: str, db: Session=Depends(get_db)):
+    openai.api_key = settings.openai_api_key
+
+    data_format = '[' \
+                  '    {' \
+                  '        "id": "1",' \
+                  '        "question": "Here goes the question",' \
+                  '        "options": ["option 1", "option 2", "option 3", "option 4"]' \
+                  '        "answer": "answer of the question among the options"' \
+                  '    }' \
+                  ']'
+
+    model = "gpt-3.5-turbo"
+
+    prompt = f"""
+           Create ```{no_of_quest}``` mcq questions along with 4 options for each questions from the content ```{text}```.
+           Format the content of your response as a JSON object with "Question", "Options" and "Answer" as the keys. The "Answer"
+           should be among the options.  An example response format is {data_format}
+           """
+
+    messages = [{"role": "user", "content": prompt}]
+    response = openai.ChatCompletion.create(
+        model=model,
+        messages=messages,
+        temperature=0,  # this is the degree of randomness of the model's output
+    )
+
+    exam_repo.save_exam(db, userId=1, script=response.choices[0].message["content"])
+    # return response
+    return json.loads(response.choices[0].message["content"])
+
+
+@router.post('/generateQuestionFromPDF')
+async def generate_question_from_pdf(no_of_quest: int, file: UploadFile, db: Session=Depends(get_db)):
     try:
         # Save the uploaded file to disk
         file_path = f"temp/{file.filename}"
@@ -90,7 +123,6 @@ async def generate_question(no_of_quest: int, file: UploadFile, db: Session=Depe
     )
 
     exam_repo.save_exam(db, userId=1, script=response.choices[0].message["content"])
-
     # return response
     return json.loads(response.choices[0].message["content"])
 
