@@ -3,6 +3,7 @@ from config import settings
 from fastapi import UploadFile
 from pdf2image import convert_from_path
 from sqlalchemy.orm import Session
+from pydantic import BaseModel
 
 import PyPDF2
 import os
@@ -28,20 +29,30 @@ def get_db():
         db.close()
 
 
-@router.post('/getExams')
+class ExamRequest(BaseModel):
+    no_of_quest: int
+    examType: str
+    difficulty: str
+    questionType: str
+    selectedLanguage: str
+    text: str
+
+
+@router.get('/getResults')
 async def get_exams_by_user(userId: int, db: Session=Depends(get_db)):
     exams = exam_repo.get_exams_by_userid(db, userId)
     scripts = [exam.script for exam in exams]  # Extract 'scripts' from each 'exam'
-    response = []
-    for sc in scripts:
-        response.append(json.loads(sc))
-    return response
+
+    new_objects = {}
+    for i, obj in enumerate(scripts):
+        key = f"questions_{i}"
+        new_objects[key] = json.loads(obj)
+    return new_objects
 
 
 @router.post('/generateQuestionFromText')
-async def generate_question_from_text(no_of_quest: int, text: str, db: Session=Depends(get_db)):
+async def generate_question_from_text(request: ExamRequest, db: Session=Depends(get_db)):
     openai.api_key = settings.openai_api_key
-
     data_format = '[' \
                   '    {' \
                   '        "id": "1",' \
@@ -54,7 +65,7 @@ async def generate_question_from_text(no_of_quest: int, text: str, db: Session=D
     model = "gpt-3.5-turbo"
 
     prompt = f"""
-           Create ```{no_of_quest}``` mcq questions along with 4 options for each questions from the content ```{text}```.
+           Create ```{request.no_of_quest}``` mcq questions along with 4 options for each questions from the content ```{request.text}```.
            Format the content of your response as a JSON object with "Question", "Options" and "Answer" as the keys. The "Answer"
            should be among the options.  An example response format is {data_format}
            """
