@@ -143,7 +143,7 @@ async def evaluate_speech(file: UploadFile):
            You are an English language learning assistant. The student has given you the text {audio_data}.
            Give a review of this text. Mention if there is any grammatical error or not. 
            Give your review in points and in a friendly tone. If there is any room for improvement
-           then suggest it too.
+           then suggest it too. Give the output in html formatting
            """
 
     messages = [{"role": "user", "content": prompt}]
