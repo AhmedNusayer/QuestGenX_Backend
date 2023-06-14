@@ -28,10 +28,14 @@ def get_db():
         db.close()
 
 
-@router.post('/getExam')
-async def get_exam_by_exam_id(examId: int, db: Session=Depends(get_db)):
-    exam = exam_repo.get_exam(db, examId)
-    return json.loads(exam.script)
+@router.post('/getExams')
+async def get_exams_by_user(userId: int, db: Session=Depends(get_db)):
+    exams = exam_repo.get_exams_by_userid(db, userId)
+    scripts = [exam.script for exam in exams]  # Extract 'scripts' from each 'exam'
+    response = []
+    for sc in scripts:
+        response.append(json.loads(sc))
+    return response
 
 
 @router.post('/generateQuestionFromText')
