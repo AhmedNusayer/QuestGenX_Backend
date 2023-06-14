@@ -66,8 +66,8 @@ async def generate_question_from_text(request: ExamRequest, db: Session=Depends(
 
     prompt = f"""
            Create ```{request.no_of_quest}``` mcq questions along with 4 options for each questions from the content ```{request.text}```.
-           Format the content of your response as a JSON object with "Question", "Options" and "Answer" as the keys. The "Answer"
-           should be among the options.  An example response format is {data_format}
+           Format the content of your response as a JSON object with "id","question", "options" and "answer" as the keys. The "Answer"
+           should be among the options. here "id" should be incremental and unique.  An example response format is {data_format}
            """
 
     messages = [{"role": "user", "content": prompt}]
@@ -126,8 +126,8 @@ async def generate_question_from_pdf(no_of_quest: int, file: UploadFile, db: Ses
 
     prompt = f"""
        Create ```{no_of_quest}``` mcq questions along with 4 options for each questions from the content ```{contents_of_first_page}```.
-       Format the content of your response as a JSON object with "Question", "Options" and "Answer" as the keys. The "Answer"
-       should be among the options.  An example response format is {data_format}
+       Format the content of your response as a JSON object with "id","question", "options" and "answer" as the keys. The "Answer"
+       should be among the options. here "id" should be incremental and unique.  An example response format is {data_format}
        """
 
     messages = [{"role": "user", "content": prompt}]
