@@ -1,9 +1,11 @@
 import speech_recognition as sr
 import os
 from pydub import AudioSegment
+from config import settings
 from pydub.silence import split_on_silence
 
 # create a speech recognition object
+AzureSpeechKey = "" #api key will come from .env
 r = sr.Recognizer()
 
 
@@ -12,7 +14,8 @@ def transcribe_audio(path):
     with sr.AudioFile(path) as source:
         audio_listened = r.record(source)
         # try converting it to text
-        text = r.recognize_google(audio_listened)
+        text = r.recognize_azure(audio_listened, key=AzureSpeechKey, location="southeastasia")
+        # text = r.recognize_google(audio_listened)
     return text
 
 
@@ -50,7 +53,8 @@ def get_large_audio_transcription_on_silence(path):
         except sr.UnknownValueError as e:
             print("Error:", str(e))
         else:
-            text = f"{text.capitalize()}. "
+            # text = f"{text.capitalize()}. "
+            text = f"{text}. " # for azure capitalize not working
             print(chunk_filename, ":", text)
             whole_text += text
 
