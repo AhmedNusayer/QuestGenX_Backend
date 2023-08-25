@@ -5,7 +5,7 @@ import os
 import pytesseract
 
 
-pytesseract.pytesseract.tesseract_cmd = r'C:\Program Files\Tesseract-OCR\tesseract.exe'
+pytesseract.pytesseract.tesseract_cmd = r'C:\Users\BS871\Desktop\Tesseract-OCR\tesseract.exe'
 
 
 async def read_pdf_files(file: UploadFile):
@@ -20,7 +20,7 @@ async def read_pdf_files(file: UploadFile):
         contents_of_first_page = reader.pages[0].extract_text()
         if contents_of_first_page == "":
             print("scanned pdf")
-            images = convert_from_path(file_path, poppler_path=r'E:\poppler-23.05.0\Library\bin')
+            images = convert_from_path(file_path, poppler_path=r'C:\Users\BS871\Desktop\poppler-23.05.0\Library\bin')
 
             texts = []
             for i, image in enumerate(images):

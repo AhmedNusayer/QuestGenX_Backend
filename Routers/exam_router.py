@@ -18,7 +18,7 @@ from Repository import exam_repo
 
 router = APIRouter()
 
-pytesseract.pytesseract.tesseract_cmd = r'C:\Program Files\Tesseract-OCR\tesseract.exe'
+pytesseract.pytesseract.tesseract_cmd = r'C:\Users\BS871\Desktop\Tesseract-OCR\tesseract.exe'
 
 
 def get_db():
@@ -93,10 +93,9 @@ async def generate_question_from_pdf(no_of_quest: int, file: UploadFile, db: Ses
         # creating a pdf reader object
         reader = PyPDF2.PdfReader(file.file)
         contents_of_first_page = reader.pages[0].extract_text()
-        if contents_of_first_page == "":
+        if contents_of_first_page == "" or len(contents_of_first_page) < 20:
             print("scanned pdf")
-            images = convert_from_path(file_path, poppler_path=r'E:\poppler-23.05.0\Library\bin')
-
+            images = convert_from_path(file_path, poppler_path=r'C:\Users\BS871\Desktop\poppler-23.05.0\Library\bin')
             texts = []
             for i, image in enumerate(images):
                 text = pytesseract.image_to_string(image, lang='Bengali')
@@ -128,6 +127,7 @@ async def generate_question_from_pdf(no_of_quest: int, file: UploadFile, db: Ses
        Create ```{no_of_quest}``` mcq questions along with 4 options for each questions from the content ```{contents_of_first_page}```.
        Format the content of your response as a JSON object with "id","question", "options" and "answer" as the keys. The "Answer"
        should be among the options. here "id" should be incremental and unique.  An example response format is {data_format}
+       The questions should be in the same language as the content.
        """
 
     messages = [{"role": "user", "content": prompt}]
@@ -171,4 +171,39 @@ async def evaluate_speech(file: UploadFile):
     os.remove(file_path)
 
     return response.choices[0].message["content"]
+
+
+@router.post('/generateQuestionFromTopic')
+async def generate_question_from_topic(topic: str, db: Session=Depends(get_db)):
+    openai.api_key = settings.openai_api_key
+
+    data_format = '[' \
+                  '    {' \
+                  '        "id": "1",' \
+                  '        "question": "Here goes the question",' \
+                  '        "options": ["option 1", "option 2", "option 3", "option 4"]' \
+                  '        "answer": "answer of the question among the options"' \
+                  '    }' \
+                  ']'
+
+    model = "gpt-3.5-turbo"
+
+    prompt = f"""
+       Create 5 mcq questions along with 4 options for each questions on the topic {topic} 
+       Format the content of your response as a JSON object with "id","question", "options" and "answer" as the keys. The "Answer"
+       should be among the options. here "id" should be incremental and unique.  An example response format is {data_format}
+       The questions should be in the same language as the content..
+       """
+
+    messages = [{"role": "user", "content": prompt}]
+    response = openai.ChatCompletion.create(
+        model=model,
+        messages=messages,
+        temperature=0,  # this is the degree of randomness of the model's output
+    )
+    print(response.choices[0].message["content"])
+
+    exam_repo.save_exam(db, userId=1, script=response.choices[0].message["content"])
+    # return response
+    return json.loads(response.choices[0].message["content"])
 
