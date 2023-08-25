@@ -62,7 +62,7 @@ async def generate_question_from_text(request: ExamRequest, db: Session=Depends(
                   '    }' \
                   ']'
 
-    model = "gpt-3.5-turbo"
+    model = "gpt-4"
 
     prompt = f"""
            Create ```{request.no_of_quest}``` mcq questions along with 4 options for each questions from the content ```{request.text}```.
@@ -122,7 +122,7 @@ async def generate_question_from_pdf(no_of_quest: int, file: UploadFile, db: Ses
                   '    }' \
                   ']'
 
-    model = "gpt-3.5-turbo"
+    model = "gpt-4"
 
     prompt = f"""
        Create ```{no_of_quest}``` mcq questions along with 4 options for each questions from the content ```{contents_of_first_page}```.
@@ -153,7 +153,7 @@ async def evaluate_speech(file: UploadFile):
     audio_data = audio_service.get_large_audio_transcription_on_silence(file_path)
 
     openai.api_key = settings.openai_api_key
-    model = "gpt-3.5-turbo"
+    model = "gpt-4"
 
     prompt = f"""
            You are an English language learning assistant. The student has given you the text {audio_data}.
@@ -187,7 +187,7 @@ async def generate_question_from_topic(topic: str, db: Session=Depends(get_db)):
                   '    }' \
                   ']'
 
-    model = "gpt-3.5-turbo"
+    model = "gpt-4"
 
     prompt = f"""
        Create 5 mcq questions along with 4 options for each questions on the topic {topic} 
